@@ -10,7 +10,7 @@ import org.springframework.jms.support.converter.MessageType;
 public class JmsConfig {
 
     public static final String VALIDATE_ORDER_QUEUE = "VALIDATE_ORDER_QUEUE";
-    public static final String MY_SEND_RCV_QUEUE = "MY_SEND_RCV_QUEUE";
+    public static final String VALIDATE_ORDER_RESPONSE_QUEUE = "VALIDATE_ORDER_RESPONSE_QUEUE";
 
     /**
      * Данный метод создает бин, который будет использоваться как конвертер сообщений при работе с JMS.

@@ -14,6 +14,8 @@ import sakhno.sfg.beer.order.service.domain.BeerOrderEventEnum;
 import sakhno.sfg.beer.order.service.domain.BeerOrderStatusEnum;
 import sakhno.sfg.beer.order.service.repositories.BeerOrderRepository;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
@@ -30,6 +32,16 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
         BeerOrderEntity savedBeerOrder = beerOrderRepository.save(beerOrderEntity);
         sendBeerOrderEvent(savedBeerOrder, BeerOrderEventEnum.VALIDATE_ORDER);
         return savedBeerOrder;
+    }
+
+    @Override
+    public void processValidationResult(UUID beerOrderId, Boolean isValid) {
+        BeerOrderEntity beerOrder = beerOrderRepository.findOneById(beerOrderId);
+        if(isValid) {
+            sendBeerOrderEvent(beerOrder, BeerOrderEventEnum.VALIDATION_PASSED);
+        } else {
+            sendBeerOrderEvent(beerOrder, BeerOrderEventEnum.VALIDATION_FAILED);
+        }
     }
 
     private void sendBeerOrderEvent(BeerOrderEntity beerOrderEntity, BeerOrderEventEnum event) {
