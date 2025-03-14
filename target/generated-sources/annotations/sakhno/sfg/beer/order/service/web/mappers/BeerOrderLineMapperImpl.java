@@ -10,7 +10,7 @@ import sakhno.sfg.beer.order.service.web.model.BeerOrderLineDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-03-11T21:27:37+0600",
+    date = "2025-03-14T20:14:51+0600",
     comments = "version: 1.5.3.Final, compiler: javac, environment: Java 19.0.1 (Oracle Corporation)"
 )
 @Component

@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import sakhno.sfg.beer.order.service.domain.BeerOrderStatusEnum;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -19,12 +20,12 @@ public class BeerOrderDto extends BaseItemDto {
     private UUID customerId;
     private String customerRef;
     private List<BeerOrderLineDto> beerOrderLines;
-    private OrderStatusEnum orderStatus;
+    private BeerOrderStatusEnum orderStatus;
     private String orderStatusCallbackUrl;
 
     @Builder
     public BeerOrderDto(UUID id, Integer version, OffsetDateTime createdDate, OffsetDateTime lastModifiedDate, UUID customerId, List<BeerOrderLineDto> beerOrderLines,
-                        OrderStatusEnum orderStatus, String orderStatusCallbackUrl, String customerRef) {
+                        BeerOrderStatusEnum orderStatus, String orderStatusCallbackUrl, String customerRef) {
         super(id, version, createdDate, lastModifiedDate);
         this.customerId = customerId;
         this.beerOrderLines = beerOrderLines;

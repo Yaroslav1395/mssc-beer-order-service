@@ -32,14 +32,14 @@ public class BeerOrderEntity extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "order_status")
-    private OrderStatusEnum orderStatus = OrderStatusEnum.NEW;
+    private BeerOrderStatusEnum orderStatus = BeerOrderStatusEnum.NEW;
 
     @Column(name = "order_status_callback_url")
     private String orderStatusCallbackUrl;
 
     @Builder
     public BeerOrderEntity(UUID id, Long version, Timestamp createdDate, Timestamp lastModifiedDate, String customerRef, CustomerEntity customerEntity,
-                           Set<BeerOrderLineEntity> beerOrderLines, OrderStatusEnum orderStatus,
+                           Set<BeerOrderLineEntity> beerOrderLines, BeerOrderStatusEnum orderStatus,
                            String orderStatusCallbackUrl) {
         super(id, version, createdDate, lastModifiedDate);
         this.customerRef = customerRef;
