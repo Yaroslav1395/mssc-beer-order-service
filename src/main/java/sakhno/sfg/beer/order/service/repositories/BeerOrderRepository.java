@@ -2,9 +2,9 @@ package sakhno.sfg.beer.order.service.repositories;
 
 
 import jakarta.persistence.LockModeType;
+import sakhno.sfg.beer.order.service.domain.BeeOrderStatusEnum;
 import sakhno.sfg.beer.order.service.domain.BeerOrderEntity;
 import sakhno.sfg.beer.order.service.domain.CustomerEntity;
-import sakhno.sfg.beer.order.service.domain.OrderStatusEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,10 +26,10 @@ public interface BeerOrderRepository  extends JpaRepository<BeerOrderEntity, UUI
 
     /**
      * Метод позволяет найти все заказы по статусу
-     * @param orderStatusEnum - статус заказа
+     * @param beeOrderStatusEnum - статус заказа
      * @return - список заказов
      */
-    List<BeerOrderEntity> findAllByOrderStatus(OrderStatusEnum orderStatusEnum);
+    List<BeerOrderEntity> findAllByOrderStatus(BeeOrderStatusEnum beeOrderStatusEnum);
 
     /**
      * Метод позволяет найти заказ по его UUID. @Lock - аннотация говорит Hibernate, что при выполнении

@@ -1,9 +1,9 @@
 package sakhno.sfg.beer.order.service.services.order;
 
+import sakhno.sfg.beer.order.service.domain.BeeOrderStatusEnum;
 import sakhno.sfg.beer.order.service.domain.BeerOrderEntity;
 import sakhno.sfg.beer.order.service.domain.BeerOrderLineEntity;
 import sakhno.sfg.beer.order.service.domain.CustomerEntity;
-import sakhno.sfg.beer.order.service.domain.OrderStatusEnum;
 import sakhno.sfg.beer.order.service.repositories.BeerOrderRepository;
 import sakhno.sfg.beer.order.service.repositories.CustomerRepository;
 import sakhno.sfg.beer.order.service.web.mappers.BeerOrderMapper;
@@ -69,7 +69,7 @@ public class BeerOrderServiceImpl implements BeerOrderService {
             BeerOrderEntity beerOrderEntity = beerOrderMapper.dtoToBeerOrder(beerOrderDto);
             beerOrderEntity.setId(null); //should not be set by outside client
             beerOrderEntity.setCustomer(customerOptional.get());
-            beerOrderEntity.setOrderStatus(OrderStatusEnum.NEW);
+            beerOrderEntity.setOrderStatus(BeeOrderStatusEnum.NEW);
             Set<BeerOrderLineEntity> beerOrderLineEntity = beerOrderEntity.getBeerOrderLines();
             beerOrderEntity.setBeerOrderLines(null);
             BeerOrderEntity beerOrder = beerOrderRepository.saveAndFlush(beerOrderEntity);
@@ -96,7 +96,7 @@ public class BeerOrderServiceImpl implements BeerOrderService {
     @Override
     public void pickupOrder(UUID customerId, UUID orderId) {
         BeerOrderEntity beerOrderEntity = getOrder(customerId, orderId);
-        beerOrderEntity.setOrderStatus(OrderStatusEnum.PICKED_UP);
+        beerOrderEntity.setOrderStatus(BeeOrderStatusEnum.PICKED_UP);
 
         beerOrderRepository.save(beerOrderEntity);
     }

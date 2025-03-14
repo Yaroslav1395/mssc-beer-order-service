@@ -8,10 +8,10 @@ import java.util.UUID;
 import javax.annotation.processing.Generated;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import sakhno.sfg.beer.order.service.domain.BeeOrderStatusEnum;
 import sakhno.sfg.beer.order.service.domain.BeerOrderEntity;
 import sakhno.sfg.beer.order.service.domain.BeerOrderLineEntity;
 import sakhno.sfg.beer.order.service.domain.CustomerEntity;
-import sakhno.sfg.beer.order.service.domain.OrderStatusEnum;
 import sakhno.sfg.beer.order.service.web.model.BeerOrderDto;
 import sakhno.sfg.beer.order.service.web.model.BeerOrderLineDto;
 
@@ -119,21 +119,21 @@ public class BeerOrderMapperImpl implements BeerOrderMapper {
         return list;
     }
 
-    protected sakhno.sfg.beer.order.service.web.model.OrderStatusEnum orderStatusEnumToOrderStatusEnum(OrderStatusEnum orderStatusEnum) {
-        if ( orderStatusEnum == null ) {
+    protected sakhno.sfg.beer.order.service.web.model.OrderStatusEnum orderStatusEnumToOrderStatusEnum(BeeOrderStatusEnum beeOrderStatusEnum) {
+        if ( beeOrderStatusEnum == null ) {
             return null;
         }
 
         sakhno.sfg.beer.order.service.web.model.OrderStatusEnum orderStatusEnum1;
 
-        switch ( orderStatusEnum ) {
+        switch (beeOrderStatusEnum) {
             case NEW: orderStatusEnum1 = sakhno.sfg.beer.order.service.web.model.OrderStatusEnum.NEW;
             break;
             case READY: orderStatusEnum1 = sakhno.sfg.beer.order.service.web.model.OrderStatusEnum.READY;
             break;
             case PICKED_UP: orderStatusEnum1 = sakhno.sfg.beer.order.service.web.model.OrderStatusEnum.PICKED_UP;
             break;
-            default: throw new IllegalArgumentException( "Unexpected enum constant: " + orderStatusEnum );
+            default: throw new IllegalArgumentException( "Unexpected enum constant: " + beeOrderStatusEnum);
         }
 
         return orderStatusEnum1;
@@ -172,23 +172,23 @@ public class BeerOrderMapperImpl implements BeerOrderMapper {
         return set;
     }
 
-    protected OrderStatusEnum orderStatusEnumToOrderStatusEnum1(sakhno.sfg.beer.order.service.web.model.OrderStatusEnum orderStatusEnum) {
+    protected BeeOrderStatusEnum orderStatusEnumToOrderStatusEnum1(sakhno.sfg.beer.order.service.web.model.OrderStatusEnum orderStatusEnum) {
         if ( orderStatusEnum == null ) {
             return null;
         }
 
-        OrderStatusEnum orderStatusEnum1;
+        BeeOrderStatusEnum beeOrderStatusEnum1;
 
         switch ( orderStatusEnum ) {
-            case NEW: orderStatusEnum1 = OrderStatusEnum.NEW;
+            case NEW: beeOrderStatusEnum1 = BeeOrderStatusEnum.NEW;
             break;
-            case READY: orderStatusEnum1 = OrderStatusEnum.READY;
+            case READY: beeOrderStatusEnum1 = BeeOrderStatusEnum.READY;
             break;
-            case PICKED_UP: orderStatusEnum1 = OrderStatusEnum.PICKED_UP;
+            case PICKED_UP: beeOrderStatusEnum1 = BeeOrderStatusEnum.PICKED_UP;
             break;
             default: throw new IllegalArgumentException( "Unexpected enum constant: " + orderStatusEnum );
         }
 
-        return orderStatusEnum1;
+        return beeOrderStatusEnum1;
     }
 }
