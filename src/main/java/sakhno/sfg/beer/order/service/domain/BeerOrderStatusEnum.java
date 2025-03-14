@@ -1,6 +1,6 @@
 package sakhno.sfg.beer.order.service.domain;
 
-public enum BeeOrderStatusEnum {
+public enum BeerOrderStatusEnum {
     NEW,
     VALIDATED,
     VALIDATION_EXCEPTION,
