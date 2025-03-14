@@ -9,7 +9,7 @@ import org.springframework.jms.support.converter.MessageType;
 @Configuration
 public class JmsConfig {
 
-    public static final String MY_QUEUE = "MY_HELLO_WORLD";
+    public static final String VALIDATE_ORDER_QUEUE = "VALIDATE_ORDER_QUEUE";
     public static final String MY_SEND_RCV_QUEUE = "MY_SEND_RCV_QUEUE";
 
     /**
