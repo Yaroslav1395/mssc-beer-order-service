@@ -1,4 +1,4 @@
-package sakhno.sfg.beer.order.service.services.beer;
+package sakhno.sfg.beer.order.service.services.order;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
@@ -13,6 +13,7 @@ import sakhno.sfg.beer.order.service.domain.BeerOrderEntity;
 import sakhno.sfg.beer.order.service.domain.BeerOrderEventEnum;
 import sakhno.sfg.beer.order.service.domain.BeerOrderStatusEnum;
 import sakhno.sfg.beer.order.service.repositories.BeerOrderRepository;
+import sakhno.sfg.beer.order.service.web.model.BeerOrderDto;
 
 import java.util.UUID;
 
@@ -46,6 +47,26 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
         }
     }
 
+    @Override
+    public void beerOrderAllocationPassed(BeerOrderDto beerOrderDto) {
+        BeerOrderEntity beerOrderEntity = beerOrderRepository.findOneById(beerOrderDto.getId());
+        sendBeerOrderEvent(beerOrderEntity, BeerOrderEventEnum.ALLOCATION_SUCCESS);
+        updateAllocatedQty(beerOrderDto, beerOrderEntity);
+    }
+
+    @Override
+    public void beerOrderAllocationPendingInventory(BeerOrderDto beerOrderDto) {
+        BeerOrderEntity beerOrderEntity = beerOrderRepository.findOneById(beerOrderDto.getId());
+        sendBeerOrderEvent(beerOrderEntity, BeerOrderEventEnum.ALLOCATION_NO_INVENTORY);
+        updateAllocatedQty(beerOrderDto, beerOrderEntity);
+    }
+
+    @Override
+    public void beerOrderAllocationFailed(BeerOrderDto beerOrderDto) {
+        BeerOrderEntity beerOrderEntity = beerOrderRepository.findOneById(beerOrderDto.getId());
+        sendBeerOrderEvent(beerOrderEntity, BeerOrderEventEnum.ALLOCATION_FAILED);
+    }
+
     private void sendBeerOrderEvent(BeerOrderEntity beerOrderEntity, BeerOrderEventEnum event) {
         StateMachine<BeerOrderStatusEnum, BeerOrderEventEnum> sm = build(beerOrderEntity);
         Message msg = MessageBuilder.withPayload(event)
@@ -64,5 +85,19 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
         });
         sm.start();
         return sm;
+    }
+
+    private void updateAllocatedQty(BeerOrderDto beerOrderDto, BeerOrderEntity beerOrderEntity) {
+        BeerOrderEntity allocatedOrder = beerOrderRepository.findOneById(beerOrderDto.getId());
+
+        allocatedOrder.getBeerOrderLines().forEach(beerOrderLineEntity -> {
+            beerOrderDto.getBeerOrderLines().forEach(beerOrderLineDto -> {
+                if(beerOrderLineEntity.getId().equals(beerOrderLineDto.getId())) {
+                    beerOrderLineEntity.setQuantityAllocated(beerOrderLineDto.getQuantityAllocated());
+                }
+            });
+        });
+
+        beerOrderRepository.saveAndFlush(beerOrderEntity);
     }
 }

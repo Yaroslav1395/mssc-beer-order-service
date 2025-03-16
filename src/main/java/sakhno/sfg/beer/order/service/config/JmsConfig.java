@@ -12,6 +12,7 @@ public class JmsConfig {
     public static final String VALIDATE_ORDER_QUEUE = "VALIDATE_ORDER_QUEUE";
     public static final String VALIDATE_ORDER_RESPONSE_QUEUE = "VALIDATE_ORDER_RESPONSE_QUEUE";
     public static final String ALLOCATION_ORDER_QUEUE = "ALLOCATION_ORDER_QUEUE";
+    public static final String ALLOCATION_ORDER_RESPONSE_QUEUE = "ALLOCATION_ORDER_RESPONSE_QUEUE";
 
     /**
      * Данный метод создает бин, который будет использоваться как конвертер сообщений при работе с JMS.
