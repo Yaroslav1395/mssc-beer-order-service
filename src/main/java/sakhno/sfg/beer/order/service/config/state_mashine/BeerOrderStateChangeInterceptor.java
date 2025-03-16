@@ -12,7 +12,7 @@ import sakhno.sfg.beer.order.service.domain.BeerOrderEntity;
 import sakhno.sfg.beer.order.service.domain.BeerOrderEventEnum;
 import sakhno.sfg.beer.order.service.domain.BeerOrderStatusEnum;
 import sakhno.sfg.beer.order.service.repositories.BeerOrderRepository;
-import sakhno.sfg.beer.order.service.services.beer.BeerOrderManagerServiceImpl;
+import sakhno.sfg.beer.order.service.services.order.BeerOrderManagerServiceImpl;
 
 import java.util.Optional;
 import java.util.UUID;

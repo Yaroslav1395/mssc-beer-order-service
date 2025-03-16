@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 import sakhno.sfg.beer.order.service.config.JmsConfig;
-import sakhno.sfg.beer.order.service.services.beer.BeerOrderManagerService;
+import sakhno.sfg.beer.order.service.services.order.BeerOrderManagerService;
 import sakhno.sfg.beer.order.service.web.model.events.ValidateOrderResult;
 
 import java.util.UUID;
