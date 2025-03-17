@@ -8,6 +8,7 @@ import org.springframework.statemachine.state.State;
 import org.springframework.statemachine.support.StateMachineInterceptorAdapter;
 import org.springframework.statemachine.transition.Transition;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import sakhno.sfg.beer.order.service.domain.BeerOrderEntity;
 import sakhno.sfg.beer.order.service.domain.BeerOrderEventEnum;
 import sakhno.sfg.beer.order.service.domain.BeerOrderStatusEnum;
@@ -24,13 +25,15 @@ public class BeerOrderStateChangeInterceptor extends StateMachineInterceptorAdap
     private final BeerOrderRepository beerOrderRepository;
 
     @Override
+    @Transactional
     public void preStateChange(State<BeerOrderStatusEnum, BeerOrderEventEnum> state, Message<BeerOrderEventEnum> message, Transition<BeerOrderStatusEnum, BeerOrderEventEnum> transition, StateMachine<BeerOrderStatusEnum, BeerOrderEventEnum> stateMachine) {
         Optional.ofNullable(message)
-                .flatMap(msg -> Optional.ofNullable((String) msg.getHeaders().getOrDefault(
-                        BeerOrderManagerServiceImpl.ORDER_ID_HEADER, "")))
+                .flatMap(msg -> Optional.of(msg.getHeaders().get(BeerOrderManagerServiceImpl.ORDER_ID_HEADER)))
+                .filter(value -> value instanceof UUID)  // проверяем, что значение действительно UUID
+                .map(value -> (UUID) value)  // приводим к UUID
                 .ifPresent(orderId -> {
                     log.info("Сохранение статуса заказа. Id заказа: {}. Статус: {}", orderId, state.getId());
-                    BeerOrderEntity beerOrder = beerOrderRepository.findOneById(UUID.fromString(orderId));
+                    BeerOrderEntity beerOrder = beerOrderRepository.findById(orderId).get();
                     beerOrder.setOrderStatus(state.getId());
                     beerOrderRepository.saveAndFlush(beerOrder);
                 });

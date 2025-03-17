@@ -13,10 +13,11 @@ import sakhno.sfg.beer.order.service.domain.BeerOrderStatusEnum;
 import sakhno.sfg.beer.order.service.repositories.BeerOrderRepository;
 import sakhno.sfg.beer.order.service.services.order.BeerOrderManagerServiceImpl;
 import sakhno.sfg.beer.order.service.web.mappers.BeerOrderMapper;
+import sakhno.sfg.beer.order.service.web.model.events.ValidateOrderRequest;
 
 import java.util.UUID;
 
-@Component
+@Component("allocatedOrderAction")
 @RequiredArgsConstructor
 @Slf4j
 public class AllocatedOrderAction implements Action<BeerOrderStatusEnum, BeerOrderEventEnum> {
@@ -30,11 +31,10 @@ public class AllocatedOrderAction implements Action<BeerOrderStatusEnum, BeerOrd
      */
     @Override
     public void execute(StateContext<BeerOrderStatusEnum, BeerOrderEventEnum> stateContext) {
-        String beerOrderId = (String) stateContext.getMessage().getHeaders().get(BeerOrderManagerServiceImpl.ORDER_ID_HEADER);
-        BeerOrderEntity beerOrder = beerOrderRepository.findOneById(UUID.fromString(beerOrderId));
+        String beerOrderId = stateContext.getMessage().getHeaders().get(BeerOrderManagerServiceImpl.ORDER_ID_HEADER).toString();
+        BeerOrderEntity beerOrder = beerOrderRepository.findById(UUID.fromString(beerOrderId)).get();
         jmsTemplate.convertAndSend(JmsConfig.ALLOCATION_ORDER_QUEUE,
                 beerOrderMapper.beerOrderToDto(beerOrder));
         log.info("Отправка на распределение в очередь заказа с id: {}", beerOrderId);
-
     }
 }

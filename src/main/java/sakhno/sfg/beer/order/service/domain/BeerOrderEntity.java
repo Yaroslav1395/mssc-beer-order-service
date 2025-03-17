@@ -1,10 +1,7 @@
 package sakhno.sfg.beer.order.service.domain;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
@@ -47,5 +44,15 @@ public class BeerOrderEntity extends BaseEntity {
         this.beerOrderLines = beerOrderLines;
         this.orderStatus = orderStatus;
         this.orderStatusCallbackUrl = orderStatusCallbackUrl;
+    }
+
+    @Override
+    public String toString() {
+        return "BeerOrderEntity{" +
+                "customerRef='" + customerRef + '\'' +
+                ", customer=" + customer +
+                ", orderStatus=" + orderStatus +
+                ", orderStatusCallbackUrl='" + orderStatusCallbackUrl + '\'' +
+                '}';
     }
 }

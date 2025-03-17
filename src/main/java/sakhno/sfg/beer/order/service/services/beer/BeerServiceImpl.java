@@ -12,8 +12,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class BeerServiceImpl implements BeerService {
-    private final String BEER_PATH = "/api/v1/beer/";
-    private final String BEER_UPC_PATH = "/api/v2/beer/";
+    public static final String BEER_PATH = "/api/v1/beer/";
+    public static final String BEER_UPC_PATH = "/api/v2/beer/";
     @Value("${sfg.brewery.beer-service-host}")
     private String beerServiceHost;
     private final RestTemplate restTemplate;

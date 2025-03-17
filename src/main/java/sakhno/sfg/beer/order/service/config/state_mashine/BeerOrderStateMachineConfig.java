@@ -1,6 +1,8 @@
 package sakhno.sfg.beer.order.service.config.state_mashine;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.EnableStateMachineFactory;
@@ -14,10 +16,17 @@ import java.util.EnumSet;
 
 @Configuration
 @EnableStateMachineFactory
-@RequiredArgsConstructor
 public class BeerOrderStateMachineConfig extends StateMachineConfigurerAdapter<BeerOrderStatusEnum, BeerOrderEventEnum> {
     private final Action<BeerOrderStatusEnum, BeerOrderEventEnum> validateOrderAction;
     private final Action<BeerOrderStatusEnum, BeerOrderEventEnum> allocationOrderAction;
+
+    @Autowired
+    public BeerOrderStateMachineConfig(
+            @Qualifier("validateOrderAction") Action<BeerOrderStatusEnum, BeerOrderEventEnum> validateOrderAction,
+            @Qualifier("allocatedOrderAction") Action<BeerOrderStatusEnum, BeerOrderEventEnum> allocationOrderAction) {
+        this.validateOrderAction = validateOrderAction;
+        this.allocationOrderAction = allocationOrderAction;
+    }
 
     @Override
     public void configure(StateMachineStateConfigurer<BeerOrderStatusEnum, BeerOrderEventEnum> states) throws Exception {
@@ -41,12 +50,12 @@ public class BeerOrderStateMachineConfig extends StateMachineConfigurerAdapter<B
                     .action(validateOrderAction)
                 .and()
                 .withExternal()
-                    .source(BeerOrderStatusEnum.NEW)
+                    .source(BeerOrderStatusEnum.VALIDATION_PENDING)
                     .target(BeerOrderStatusEnum.VALIDATED)
                     .event(BeerOrderEventEnum.VALIDATION_PASSED)
                 .and()
                 .withExternal()
-                    .source(BeerOrderStatusEnum.NEW)
+                    .source(BeerOrderStatusEnum.VALIDATION_PENDING)
                     .target(BeerOrderStatusEnum.VALIDATION_EXCEPTION)
                     .event(BeerOrderEventEnum.VALIDATION_FAILED)
                 .and()

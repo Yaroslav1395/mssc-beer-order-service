@@ -1,6 +1,7 @@
 package sakhno.sfg.beer.order.service.services.order;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.statemachine.StateMachine;
@@ -15,14 +16,17 @@ import sakhno.sfg.beer.order.service.domain.BeerOrderStatusEnum;
 import sakhno.sfg.beer.order.service.repositories.BeerOrderRepository;
 import sakhno.sfg.beer.order.service.web.model.beer.order.BeerOrderDto;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
+//TODO: обработать Optional
 public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
     public static final String ORDER_ID_HEADER = "ORDER_ID_HEADER";
     private final StateMachineFactory<BeerOrderStatusEnum, BeerOrderEventEnum> stateMachineFactory;
-    private BeerOrderRepository beerOrderRepository;
+    private final BeerOrderRepository beerOrderRepository;
     private final BeerOrderStateChangeInterceptor beerOrderStateChangeInterceptor;
 
     /**
@@ -33,9 +37,11 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
     @Override
     @Transactional
     public BeerOrderEntity newBeerOrder(BeerOrderEntity beerOrderEntity) {
+        log.info("Создание нового заказа. Id: {}", beerOrderEntity.getId());
         beerOrderEntity.setId(null);
         beerOrderEntity.setOrderStatus(BeerOrderStatusEnum.NEW);
         BeerOrderEntity savedBeerOrder = beerOrderRepository.save(beerOrderEntity);
+        log.info("Заказ создан: {}", savedBeerOrder);
         sendBeerOrderEvent(savedBeerOrder, BeerOrderEventEnum.VALIDATE_ORDER);
         return savedBeerOrder;
     }
@@ -47,15 +53,19 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
      * @param isValid - результат валидации
      */
     @Override
+    @Transactional
     public void processValidationResult(UUID beerOrderId, Boolean isValid) {
-        BeerOrderEntity beerOrder = beerOrderRepository.findOneById(beerOrderId);
-        if(isValid) {
-            sendBeerOrderEvent(beerOrder, BeerOrderEventEnum.VALIDATION_PASSED);
-            BeerOrderEntity validatedOrder = beerOrderRepository.findOneById(beerOrderId);
-            sendBeerOrderEvent(validatedOrder, BeerOrderEventEnum.ALLOCATE_ORDER);
-        } else {
-            sendBeerOrderEvent(beerOrder, BeerOrderEventEnum.VALIDATION_FAILED);
-        }
+        Optional<BeerOrderEntity> beerOrderOptional = beerOrderRepository.findById(beerOrderId);
+
+        beerOrderOptional.ifPresentOrElse(beerOrder -> {
+            if(isValid) {
+                sendBeerOrderEvent(beerOrder, BeerOrderEventEnum.VALIDATION_PASSED);
+                BeerOrderEntity validatedOrder = beerOrderRepository.findById(beerOrderId).get();
+                sendBeerOrderEvent(validatedOrder, BeerOrderEventEnum.ALLOCATE_ORDER);
+            } else {
+                sendBeerOrderEvent(beerOrder, BeerOrderEventEnum.VALIDATION_FAILED);
+            }
+        }, () -> log.error("Не найдено заказа в базе по id: {}", beerOrderId));
     }
 
     /**
@@ -65,9 +75,12 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
      */
     @Override
     public void beerOrderAllocationPassed(BeerOrderDto beerOrderDto) {
-        BeerOrderEntity beerOrderEntity = beerOrderRepository.findOneById(beerOrderDto.getId());
-        sendBeerOrderEvent(beerOrderEntity, BeerOrderEventEnum.ALLOCATION_SUCCESS);
-        updateAllocatedQty(beerOrderDto, beerOrderEntity);
+        Optional<BeerOrderEntity> beerOrderOptional = beerOrderRepository.findById(beerOrderDto.getId());
+
+        beerOrderOptional.ifPresentOrElse(beerOrderEntity -> {
+            sendBeerOrderEvent(beerOrderEntity, BeerOrderEventEnum.ALLOCATION_SUCCESS);
+            updateAllocatedQty(beerOrderDto, beerOrderEntity);
+        }, () -> log.error("Не найдено заказа в базе по id: {}", beerOrderDto.getId()));
     }
 
     /**
@@ -77,9 +90,11 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
      */
     @Override
     public void beerOrderAllocationPendingInventory(BeerOrderDto beerOrderDto) {
-        BeerOrderEntity beerOrderEntity = beerOrderRepository.findOneById(beerOrderDto.getId());
-        sendBeerOrderEvent(beerOrderEntity, BeerOrderEventEnum.ALLOCATION_NO_INVENTORY);
-        updateAllocatedQty(beerOrderDto, beerOrderEntity);
+        Optional<BeerOrderEntity> beerOrderOptional = beerOrderRepository.findById(beerOrderDto.getId());
+        beerOrderOptional.ifPresentOrElse(beerOrderEntity -> {
+            sendBeerOrderEvent(beerOrderEntity, BeerOrderEventEnum.ALLOCATION_NO_INVENTORY);
+            updateAllocatedQty(beerOrderDto, beerOrderEntity);
+        }, () -> log.error("Не найдено заказа в базе по id: {}", beerOrderDto.getId()));
     }
 
     /**
@@ -89,14 +104,16 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
      */
     @Override
     public void beerOrderAllocationFailed(BeerOrderDto beerOrderDto) {
-        BeerOrderEntity beerOrderEntity = beerOrderRepository.findOneById(beerOrderDto.getId());
-        sendBeerOrderEvent(beerOrderEntity, BeerOrderEventEnum.ALLOCATION_FAILED);
+        Optional<BeerOrderEntity> beerOrderOptional = beerOrderRepository.findById(beerOrderDto.getId());
+        beerOrderOptional.ifPresentOrElse(beerOrderEntity ->
+                sendBeerOrderEvent(beerOrderEntity, BeerOrderEventEnum.ALLOCATION_FAILED),
+                () -> log.error("Не найдено заказа в базе по id: {}", beerOrderDto.getId()));
     }
 
     /**
-     * Метод
-     * @param beerOrderEntity
-     * @param event
+     * Метод позволяет отправить событие в автомат статусов
+     * @param beerOrderEntity - сущностьзаказа
+     * @param event - событие
      */
     private void sendBeerOrderEvent(BeerOrderEntity beerOrderEntity, BeerOrderEventEnum event) {
         StateMachine<BeerOrderStatusEnum, BeerOrderEventEnum> sm = build(beerOrderEntity);
@@ -132,16 +149,17 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
      * @param beerOrderEntity - сущность заказа на пиво
      */
     private void updateAllocatedQty(BeerOrderDto beerOrderDto, BeerOrderEntity beerOrderEntity) {
-        BeerOrderEntity allocatedOrder = beerOrderRepository.findOneById(beerOrderDto.getId());
+        Optional<BeerOrderEntity> beerOrderOptional = beerOrderRepository.findById(beerOrderDto.getId());
 
-        allocatedOrder.getBeerOrderLines().forEach(beerOrderLineEntity -> {
-            beerOrderDto.getBeerOrderLines().forEach(beerOrderLineDto -> {
-                if(beerOrderLineEntity.getId().equals(beerOrderLineDto.getId())) {
-                    beerOrderLineEntity.setQuantityAllocated(beerOrderLineDto.getQuantityAllocated());
-                }
+        beerOrderOptional.ifPresentOrElse(allocatedOrder -> {
+            allocatedOrder.getBeerOrderLines().forEach(beerOrderLineEntity -> {
+                beerOrderDto.getBeerOrderLines().forEach(beerOrderLineDto -> {
+                    if(beerOrderLineEntity.getId().equals(beerOrderLineDto.getId())) {
+                        beerOrderLineEntity.setQuantityAllocated(beerOrderLineDto.getQuantityAllocated());
+                    }
+                });
+                beerOrderRepository.saveAndFlush(beerOrderEntity);
             });
-        });
-
-        beerOrderRepository.saveAndFlush(beerOrderEntity);
+        }, () -> log.error("Не найдено заказа в базе по id: {}", beerOrderDto.getId()));
     }
 }

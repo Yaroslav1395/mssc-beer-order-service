@@ -1,10 +1,7 @@
 package sakhno.sfg.beer.order.service.domain;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 
 import java.sql.Timestamp;
@@ -41,5 +38,15 @@ public class BeerOrderLineEntity extends BaseEntity {
         this.upc = upc;
         this.orderQuantity = orderQuantity;
         this.quantityAllocated = quantityAllocated;
+    }
+
+    @Override
+    public String toString() {
+        return "BeerOrderLineEntity{" +
+                "beerId=" + beerId +
+                ", upc='" + upc + '\'' +
+                ", orderQuantity=" + orderQuantity +
+                ", quantityAllocated=" + quantityAllocated +
+                '}';
     }
 }
