@@ -1,4 +1,4 @@
-package sakhno.sfg.beer.order.service.web.model;
+package sakhno.sfg.beer.order.service.web.model.beer;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;

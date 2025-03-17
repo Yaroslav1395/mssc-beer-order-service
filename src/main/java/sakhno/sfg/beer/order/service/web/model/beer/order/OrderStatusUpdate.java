@@ -1,9 +1,10 @@
-package sakhno.sfg.beer.order.service.web.model;
+package sakhno.sfg.beer.order.service.web.model.beer.order;
 
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import sakhno.sfg.beer.order.service.web.model.beer.BaseItemDto;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;

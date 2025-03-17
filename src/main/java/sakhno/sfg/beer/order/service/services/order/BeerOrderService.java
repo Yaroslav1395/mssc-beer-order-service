@@ -1,8 +1,8 @@
 package sakhno.sfg.beer.order.service.services.order;
 
 
-import sakhno.sfg.beer.order.service.web.model.BeerOrderDto;
-import sakhno.sfg.beer.order.service.web.model.BeerOrderPagedList;
+import sakhno.sfg.beer.order.service.web.model.beer.order.BeerOrderDto;
+import sakhno.sfg.beer.order.service.web.model.beer.order.BeerOrderPagedList;
 import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
@@ -17,10 +17,10 @@ public interface BeerOrderService {
     BeerOrderPagedList listOrders(UUID customerId, Pageable pageable);
 
     /**
-     * Метод позволяет разместить заказчику заказ
+     * Метод позволяет создать новый заказ
      * @param customerId - id заказчика
-     * @param beerOrderDto - dto заказа
-     * @return  - сохраненный заказ
+     * @param beerOrderDto - заказ пива
+     * @return - новый заказ пива
      */
     BeerOrderDto placeOrder(UUID customerId, BeerOrderDto beerOrderDto);
 

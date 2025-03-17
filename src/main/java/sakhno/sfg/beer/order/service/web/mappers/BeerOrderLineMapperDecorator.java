@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import sakhno.sfg.beer.order.service.domain.BeerOrderLineEntity;
 import sakhno.sfg.beer.order.service.services.beer.BeerService;
-import sakhno.sfg.beer.order.service.web.model.BeerDto;
-import sakhno.sfg.beer.order.service.web.model.BeerOrderLineDto;
+import sakhno.sfg.beer.order.service.web.model.beer.BeerDto;
+import sakhno.sfg.beer.order.service.web.model.beer.order.BeerOrderLineDto;
 
 import java.util.Optional;
 

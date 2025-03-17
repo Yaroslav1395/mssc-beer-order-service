@@ -1,4 +1,4 @@
-package sakhno.sfg.beer.order.service.web.model;
+package sakhno.sfg.beer.order.service.web.model.beer.order;
 
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;

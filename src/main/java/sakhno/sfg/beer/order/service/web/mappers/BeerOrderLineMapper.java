@@ -2,7 +2,7 @@ package sakhno.sfg.beer.order.service.web.mappers;
 
 import org.mapstruct.DecoratedWith;
 import sakhno.sfg.beer.order.service.domain.BeerOrderLineEntity;
-import sakhno.sfg.beer.order.service.web.model.BeerOrderLineDto;
+import sakhno.sfg.beer.order.service.web.model.beer.order.BeerOrderLineDto;
 import org.mapstruct.Mapper;
 
 @Mapper(uses = {DateMapper.class})

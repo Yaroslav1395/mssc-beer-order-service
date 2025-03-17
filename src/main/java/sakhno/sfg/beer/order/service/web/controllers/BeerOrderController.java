@@ -2,8 +2,8 @@ package sakhno.sfg.beer.order.service.web.controllers;
 
 import lombok.RequiredArgsConstructor;
 import sakhno.sfg.beer.order.service.services.order.BeerOrderService;
-import sakhno.sfg.beer.order.service.web.model.BeerOrderDto;
-import sakhno.sfg.beer.order.service.web.model.BeerOrderPagedList;
+import sakhno.sfg.beer.order.service.web.model.beer.order.BeerOrderDto;
+import sakhno.sfg.beer.order.service.web.model.beer.order.BeerOrderPagedList;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

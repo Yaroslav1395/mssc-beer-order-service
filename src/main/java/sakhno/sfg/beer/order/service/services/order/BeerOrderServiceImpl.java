@@ -7,8 +7,8 @@ import sakhno.sfg.beer.order.service.domain.CustomerEntity;
 import sakhno.sfg.beer.order.service.repositories.BeerOrderRepository;
 import sakhno.sfg.beer.order.service.repositories.CustomerRepository;
 import sakhno.sfg.beer.order.service.web.mappers.BeerOrderMapper;
-import sakhno.sfg.beer.order.service.web.model.BeerOrderDto;
-import sakhno.sfg.beer.order.service.web.model.BeerOrderPagedList;
+import sakhno.sfg.beer.order.service.web.model.beer.order.BeerOrderDto;
+import sakhno.sfg.beer.order.service.web.model.beer.order.BeerOrderPagedList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -40,6 +40,12 @@ public class BeerOrderServiceImpl implements BeerOrderService {
         this.publisher = publisher;
     }
 
+    /**
+     * Метод позволяет найти список заказов заказчика по id
+     * @param customerId - id заказчика
+     * @param pageable - параметры пагинации
+     * @return - список заказов с пагинацией
+     */
     @Override
     public BeerOrderPagedList listOrders(UUID customerId, Pageable pageable) {
         Optional<CustomerEntity> customerOptional = customerRepository.findById(customerId);
@@ -60,6 +66,12 @@ public class BeerOrderServiceImpl implements BeerOrderService {
         }
     }
 
+    /**
+     * Метод позволяет создать новый заказ
+     * @param customerId - id заказчика
+     * @param beerOrderDto - заказ пива
+     * @return - новый заказ пива
+     */
     @Transactional
     @Override
     public BeerOrderDto placeOrder(UUID customerId, BeerOrderDto beerOrderDto) {
@@ -88,11 +100,22 @@ public class BeerOrderServiceImpl implements BeerOrderService {
         throw new RuntimeException("Customer Not Found");
     }
 
+    /**
+     * Метод позволяет получить заказ по его id и id заказчика
+     * @param customerId - id заказчика
+     * @param orderId - id заказа
+     * @return - заказ
+     */
     @Override
     public BeerOrderDto getOrderById(UUID customerId, UUID orderId) {
         return beerOrderMapper.beerOrderToDto(getOrder(customerId, orderId));
     }
 
+    /**
+     * Метод позволяет найти заказ по id и id заказчика с изменением его статуса на "Просмотрен".
+     * @param customerId - id заказчика
+     * @param orderId - id заказа
+     */
     @Override
     public void pickupOrder(UUID customerId, UUID orderId) {
         BeerOrderEntity beerOrderEntity = getOrder(customerId, orderId);

@@ -25,6 +25,11 @@ public class ValidateOrderAction implements Action<BeerOrderStatusEnum, BeerOrde
     private final BeerOrderMapper beerOrderMapper;
     private final JmsTemplate jmsTemplate;
 
+    /**
+     * Метод позволяет отправить в очередь сообщение на валидацию заказа. Проверяется список пива в заказе. Если в списке
+     * есть несуществующее пиво, то валидацию заказ не пройдет
+     * @param stateContext - контекст машины состояний
+     */
     @Override
     public void execute(StateContext<BeerOrderStatusEnum, BeerOrderEventEnum> stateContext) {
         String beerOrderId = (String) stateContext.getMessage().getHeaders().get(BeerOrderManagerServiceImpl.ORDER_ID_HEADER);

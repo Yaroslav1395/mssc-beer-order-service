@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import sakhno.sfg.beer.order.service.web.model.beer.BaseItemDto;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;

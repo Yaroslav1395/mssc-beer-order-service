@@ -13,7 +13,7 @@ import sakhno.sfg.beer.order.service.domain.BeerOrderEntity;
 import sakhno.sfg.beer.order.service.domain.BeerOrderEventEnum;
 import sakhno.sfg.beer.order.service.domain.BeerOrderStatusEnum;
 import sakhno.sfg.beer.order.service.repositories.BeerOrderRepository;
-import sakhno.sfg.beer.order.service.web.model.BeerOrderDto;
+import sakhno.sfg.beer.order.service.web.model.beer.order.BeerOrderDto;
 
 import java.util.UUID;
 
@@ -25,6 +25,11 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
     private BeerOrderRepository beerOrderRepository;
     private final BeerOrderStateChangeInterceptor beerOrderStateChangeInterceptor;
 
+    /**
+     * Метод позволяет создать новый заказ. Под заказ создается машина состояний
+     * @param beerOrderEntity - сущность заказа
+     * @return - сохраненный заказ
+     */
     @Override
     @Transactional
     public BeerOrderEntity newBeerOrder(BeerOrderEntity beerOrderEntity) {
@@ -35,6 +40,12 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
         return savedBeerOrder;
     }
 
+    /**
+     * Метод обрабатывает результат валидации заказа. Исходя из результата производится переход машины состояния,
+     * через отправку события
+     * @param beerOrderId - id заказа
+     * @param isValid - результат валидации
+     */
     @Override
     public void processValidationResult(UUID beerOrderId, Boolean isValid) {
         BeerOrderEntity beerOrder = beerOrderRepository.findOneById(beerOrderId);
@@ -47,6 +58,11 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
         }
     }
 
+    /**
+     * Метод обрабатывает результат размещения заказа, в случае если размещение прошло успешно.
+     * Осуществляется переход машины состояний через отправку соответствующего события
+     * @param beerOrderDto - заказ пива
+     */
     @Override
     public void beerOrderAllocationPassed(BeerOrderDto beerOrderDto) {
         BeerOrderEntity beerOrderEntity = beerOrderRepository.findOneById(beerOrderDto.getId());
@@ -54,6 +70,11 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
         updateAllocatedQty(beerOrderDto, beerOrderEntity);
     }
 
+    /**
+     * Метод обрабатывает результат размещения заказа в случае если количества пива на складе не достаточно,
+     * чтобы обработать заказ. Осуществляется переход машины состояний через отправку соответствующего события
+     * @param beerOrderDto - заказ пива
+     */
     @Override
     public void beerOrderAllocationPendingInventory(BeerOrderDto beerOrderDto) {
         BeerOrderEntity beerOrderEntity = beerOrderRepository.findOneById(beerOrderDto.getId());
@@ -61,12 +82,22 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
         updateAllocatedQty(beerOrderDto, beerOrderEntity);
     }
 
+    /**
+     * Метод обрабатывает результат размещения заказа в случае если произошла ошибка.
+     * Осуществляется переход машины состояний через отправку соответствующего события
+     * @param beerOrderDto - заказ пива
+     */
     @Override
     public void beerOrderAllocationFailed(BeerOrderDto beerOrderDto) {
         BeerOrderEntity beerOrderEntity = beerOrderRepository.findOneById(beerOrderDto.getId());
         sendBeerOrderEvent(beerOrderEntity, BeerOrderEventEnum.ALLOCATION_FAILED);
     }
 
+    /**
+     * Метод
+     * @param beerOrderEntity
+     * @param event
+     */
     private void sendBeerOrderEvent(BeerOrderEntity beerOrderEntity, BeerOrderEventEnum event) {
         StateMachine<BeerOrderStatusEnum, BeerOrderEventEnum> sm = build(beerOrderEntity);
         Message msg = MessageBuilder.withPayload(event)
@@ -75,6 +106,14 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
         sm.sendEvent(msg);
     }
 
+
+    /**
+     * Метод позволяет получить конечный автомат из фабрики автоматов. Останавливает его для избежания конфликтов.
+     * Устанавливает инспектор автомата, который позволяет совершать действия при изменении состояния. Автомату
+     * устанавливается текущее состояние заказа. Автомат запускается.
+     * @param beerOrder - сущность заказа
+     * @return - конечный автомат стстояний
+     */
     private StateMachine<BeerOrderStatusEnum, BeerOrderEventEnum> build(BeerOrderEntity beerOrder) {
         StateMachine<BeerOrderStatusEnum, BeerOrderEventEnum> sm = stateMachineFactory.getStateMachine(beerOrder.getId());
         sm.stop();
@@ -87,6 +126,11 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
         return sm;
     }
 
+    /**
+     * Метод позволяет установить количество размещенного заказа
+     * @param beerOrderDto - заказ на пиво после размещения
+     * @param beerOrderEntity - сущность заказа на пиво
+     */
     private void updateAllocatedQty(BeerOrderDto beerOrderDto, BeerOrderEntity beerOrderEntity) {
         BeerOrderEntity allocatedOrder = beerOrderRepository.findOneById(beerOrderDto.getId());
 

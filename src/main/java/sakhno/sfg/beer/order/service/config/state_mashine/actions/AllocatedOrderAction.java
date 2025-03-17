@@ -23,6 +23,11 @@ public class AllocatedOrderAction implements Action<BeerOrderStatusEnum, BeerOrd
     private final JmsTemplate jmsTemplate;
     private final BeerOrderRepository beerOrderRepository;
     private final BeerOrderMapper beerOrderMapper;
+
+    /**
+     * Метод позволяет отправить сообщение в очередь на размещение заказа. Заказ размещается на складе.
+     * @param stateContext - контекст машины состояний
+     */
     @Override
     public void execute(StateContext<BeerOrderStatusEnum, BeerOrderEventEnum> stateContext) {
         String beerOrderId = (String) stateContext.getMessage().getHeaders().get(BeerOrderManagerServiceImpl.ORDER_ID_HEADER);

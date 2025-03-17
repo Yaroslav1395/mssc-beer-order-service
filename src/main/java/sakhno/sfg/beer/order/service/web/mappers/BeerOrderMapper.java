@@ -2,7 +2,7 @@ package sakhno.sfg.beer.order.service.web.mappers;
 
 import org.mapstruct.Mapping;
 import sakhno.sfg.beer.order.service.domain.BeerOrderEntity;
-import sakhno.sfg.beer.order.service.web.model.BeerOrderDto;
+import sakhno.sfg.beer.order.service.web.model.beer.order.BeerOrderDto;
 import org.mapstruct.Mapper;
 
 
