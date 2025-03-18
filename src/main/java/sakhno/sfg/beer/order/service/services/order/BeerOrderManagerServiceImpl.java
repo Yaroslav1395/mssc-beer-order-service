@@ -18,6 +18,8 @@ import sakhno.sfg.beer.order.service.web.model.beer.order.BeerOrderDto;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -59,6 +61,7 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
         beerOrderOptional.ifPresentOrElse(beerOrder -> {
             if(isValid) {
                 sendBeerOrderEvent(beerOrder, BeerOrderEventEnum.VALIDATION_PASSED);
+                awaitForStatus(beerOrderId, BeerOrderStatusEnum.VALIDATED);q
                 BeerOrderEntity validatedOrder = beerOrderRepository.findById(beerOrderId).get();
                 sendBeerOrderEvent(validatedOrder, BeerOrderEventEnum.ALLOCATE_ORDER);
             } else {
@@ -78,6 +81,7 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
 
         beerOrderOptional.ifPresentOrElse(beerOrderEntity -> {
             sendBeerOrderEvent(beerOrderEntity, BeerOrderEventEnum.ALLOCATION_SUCCESS);
+            awaitForStatus(beerOrderDto.getId(), BeerOrderStatusEnum.ALLOCATED);
             updateAllocatedQty(beerOrderDto);
         }, logOrderNotFound(beerOrderDto.getId()));
     }
@@ -92,6 +96,7 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
         Optional<BeerOrderEntity> beerOrderOptional = beerOrderRepository.findById(beerOrderDto.getId());
         beerOrderOptional.ifPresentOrElse(beerOrderEntity -> {
             sendBeerOrderEvent(beerOrderEntity, BeerOrderEventEnum.ALLOCATION_NO_INVENTORY);
+            awaitForStatus(beerOrderDto.getId(), BeerOrderStatusEnum.PENDING_INVENTORY);
             updateAllocatedQty(beerOrderDto);
         }, logOrderNotFound(beerOrderDto.getId()));
     }
@@ -175,5 +180,35 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
 
     private Runnable logOrderNotFound(UUID id) {
         return () -> log.error("Не найдено заказа в базе по id: {}", id);
+    }
+
+    private void awaitForStatus(UUID beerOrderId, BeerOrderStatusEnum status) {
+        AtomicBoolean fount = new AtomicBoolean(false);
+        AtomicInteger loopCount = new AtomicInteger(0);
+
+        while (!fount.get()) {
+            if(loopCount.incrementAndGet() > 10) {
+                fount.set(true);
+                log.info("Не удалось получить статус для заказа с id: {}", beerOrderId);
+            }
+
+            beerOrderRepository.findById(beerOrderId).ifPresentOrElse(beerOrder -> {
+                if(beerOrder.getOrderStatus().equals(status)){
+                    fount.set(true);
+                    log.info("Заказ найденЭ");
+                } else {
+                    log.info("Статус для заказа не идентичен: Ожидается: {}. Текущий: {}", status.name(), beerOrder.getOrderStatus().name());
+                }
+            }, () -> log.info("Заказ не найден"));
+
+            if(!fount.get()) {
+                try {
+                    log.info("Ожидание статуса...");
+                    Thread.sleep(100);
+                }catch (Exception e) {
+                    log.error("Произошла ошибка при ожидании статуса", e);
+                }
+            }
+        }
     }
 }
