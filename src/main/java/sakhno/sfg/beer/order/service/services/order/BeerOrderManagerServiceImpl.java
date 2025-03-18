@@ -110,6 +110,14 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
                 () -> log.error("Не найдено заказа в базе по id: {}", beerOrderDto.getId()));
     }
 
+    @Override
+    public void beerOrderPikeUp(UUID id) {
+        Optional<BeerOrderEntity> beerOrderOptional = beerOrderRepository.findById(id);
+        beerOrderOptional.ifPresentOrElse(beerOrderEntity ->
+                sendBeerOrderEvent(beerOrderEntity, BeerOrderEventEnum.BEER_ORDER_PICKED_UP),
+                () -> log.error("Не найдено заказа в базе по id: {}", id));
+    }
+
     /**
      * Метод позволяет отправить событие в автомат статусов
      * @param beerOrderEntity - сущностьзаказа
