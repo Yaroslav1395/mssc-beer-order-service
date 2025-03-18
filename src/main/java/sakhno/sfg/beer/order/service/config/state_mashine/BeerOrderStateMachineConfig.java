@@ -1,6 +1,6 @@
 package sakhno.sfg.beer.order.service.config.state_mashine;
 
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
@@ -19,13 +19,16 @@ import java.util.EnumSet;
 public class BeerOrderStateMachineConfig extends StateMachineConfigurerAdapter<BeerOrderStatusEnum, BeerOrderEventEnum> {
     private final Action<BeerOrderStatusEnum, BeerOrderEventEnum> validateOrderAction;
     private final Action<BeerOrderStatusEnum, BeerOrderEventEnum> allocationOrderAction;
+    private final Action<BeerOrderStatusEnum, BeerOrderEventEnum> validationFailureAction;
 
     @Autowired
     public BeerOrderStateMachineConfig(
             @Qualifier("validateOrderAction") Action<BeerOrderStatusEnum, BeerOrderEventEnum> validateOrderAction,
-            @Qualifier("allocatedOrderAction") Action<BeerOrderStatusEnum, BeerOrderEventEnum> allocationOrderAction) {
+            @Qualifier("allocatedOrderAction") Action<BeerOrderStatusEnum, BeerOrderEventEnum> allocationOrderAction,
+            @Qualifier("validationFailureAction") Action<BeerOrderStatusEnum, BeerOrderEventEnum> validationFailureAction) {
         this.validateOrderAction = validateOrderAction;
         this.allocationOrderAction = allocationOrderAction;
+        this.validationFailureAction = validationFailureAction;
     }
 
     @Override
@@ -58,6 +61,7 @@ public class BeerOrderStateMachineConfig extends StateMachineConfigurerAdapter<B
                     .source(BeerOrderStatusEnum.VALIDATION_PENDING)
                     .target(BeerOrderStatusEnum.VALIDATION_EXCEPTION)
                     .event(BeerOrderEventEnum.VALIDATION_FAILED)
+                    .action(validationFailureAction)
                 .and()
                 .withExternal()
                     .source(BeerOrderStatusEnum.VALIDATED)
