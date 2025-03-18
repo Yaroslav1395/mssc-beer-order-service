@@ -1,5 +1,6 @@
 package sakhno.sfg.beer.order.service.services.order;
 
+import lombok.RequiredArgsConstructor;
 import sakhno.sfg.beer.order.service.domain.BeerOrderStatusEnum;
 import sakhno.sfg.beer.order.service.domain.BeerOrderEntity;
 import sakhno.sfg.beer.order.service.domain.BeerOrderLineEntity;
@@ -22,23 +23,16 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class BeerOrderServiceImpl implements BeerOrderService {
 
     private final BeerOrderRepository beerOrderRepository;
     private final CustomerRepository customerRepository;
     private final BeerOrderMapper beerOrderMapper;
-    private final ApplicationEventPublisher publisher;
+    private final BeerOrderManagerService beerOrderManagerService;
 
-    public BeerOrderServiceImpl(BeerOrderRepository beerOrderRepository,
-                                CustomerRepository customerRepository,
-                                BeerOrderMapper beerOrderMapper, ApplicationEventPublisher publisher) {
-        this.beerOrderRepository = beerOrderRepository;
-        this.customerRepository = customerRepository;
-        this.beerOrderMapper = beerOrderMapper;
-        this.publisher = publisher;
-    }
 
     /**
      * Метод позволяет найти список заказов заказчика по id
@@ -79,24 +73,17 @@ public class BeerOrderServiceImpl implements BeerOrderService {
 
         if (customerOptional.isPresent()) {
             BeerOrderEntity beerOrderEntity = beerOrderMapper.dtoToBeerOrder(beerOrderDto);
-            beerOrderEntity.setId(null); //should not be set by outside client
+            beerOrderEntity.setId(null);
             beerOrderEntity.setCustomer(customerOptional.get());
             beerOrderEntity.setOrderStatus(BeerOrderStatusEnum.NEW);
             Set<BeerOrderLineEntity> beerOrderLineEntity = beerOrderEntity.getBeerOrderLines();
             beerOrderEntity.setBeerOrderLines(null);
             BeerOrderEntity beerOrder = beerOrderRepository.saveAndFlush(beerOrderEntity);
             beerOrderLineEntity.forEach(line -> line.setBeerOrder(beerOrder));
-
-            BeerOrderEntity savedBeerOrderEntity = beerOrderRepository.saveAndFlush(beerOrder);
-
+            BeerOrderEntity savedBeerOrderEntity = beerOrderManagerService.newBeerOrder(beerOrder);
             log.debug("Saved Beer Order: " + beerOrderEntity.getId());
-
-            //todo impl
-          //  publisher.publishEvent(new NewBeerOrderEvent(savedBeerOrder));
-
             return beerOrderMapper.beerOrderToDto(savedBeerOrderEntity);
         }
-        //todo add exception type
         throw new RuntimeException("Customer Not Found");
     }
 
@@ -118,10 +105,7 @@ public class BeerOrderServiceImpl implements BeerOrderService {
      */
     @Override
     public void pickupOrder(UUID customerId, UUID orderId) {
-        BeerOrderEntity beerOrderEntity = getOrder(customerId, orderId);
-        beerOrderEntity.setOrderStatus(BeerOrderStatusEnum.PICKED_UP);
-
-        beerOrderRepository.save(beerOrderEntity);
+        beerOrderManagerService.beerOrderPikeUp(orderId);
     }
 
     /**
