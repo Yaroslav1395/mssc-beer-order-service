@@ -79,7 +79,7 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
 
         beerOrderOptional.ifPresentOrElse(beerOrderEntity -> {
             sendBeerOrderEvent(beerOrderEntity, BeerOrderEventEnum.ALLOCATION_SUCCESS);
-            updateAllocatedQty(beerOrderDto, beerOrderEntity);
+            updateAllocatedQty(beerOrderDto);
         }, () -> log.error("Не найдено заказа в базе по id: {}", beerOrderDto.getId()));
     }
 
@@ -93,7 +93,7 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
         Optional<BeerOrderEntity> beerOrderOptional = beerOrderRepository.findById(beerOrderDto.getId());
         beerOrderOptional.ifPresentOrElse(beerOrderEntity -> {
             sendBeerOrderEvent(beerOrderEntity, BeerOrderEventEnum.ALLOCATION_NO_INVENTORY);
-            updateAllocatedQty(beerOrderDto, beerOrderEntity);
+            updateAllocatedQty(beerOrderDto);
         }, () -> log.error("Не найдено заказа в базе по id: {}", beerOrderDto.getId()));
     }
 
@@ -146,19 +146,18 @@ public class BeerOrderManagerServiceImpl implements BeerOrderManagerService {
     /**
      * Метод позволяет установить количество размещенного заказа
      * @param beerOrderDto - заказ на пиво после размещения
-     * @param beerOrderEntity - сущность заказа на пиво
      */
-    private void updateAllocatedQty(BeerOrderDto beerOrderDto, BeerOrderEntity beerOrderEntity) {
-        Optional<BeerOrderEntity> beerOrderOptional = beerOrderRepository.findById(beerOrderDto.getId());
+    private void updateAllocatedQty(BeerOrderDto beerOrderDto) {
+        Optional<BeerOrderEntity> allocatedOrderOptional = beerOrderRepository.findById(beerOrderDto.getId());
 
-        beerOrderOptional.ifPresentOrElse(allocatedOrder -> {
+        allocatedOrderOptional.ifPresentOrElse(allocatedOrder -> {
             allocatedOrder.getBeerOrderLines().forEach(beerOrderLineEntity -> {
                 beerOrderDto.getBeerOrderLines().forEach(beerOrderLineDto -> {
                     if(beerOrderLineEntity.getId().equals(beerOrderLineDto.getId())) {
                         beerOrderLineEntity.setQuantityAllocated(beerOrderLineDto.getQuantityAllocated());
                     }
                 });
-                beerOrderRepository.saveAndFlush(beerOrderEntity);
+                beerOrderRepository.saveAndFlush(allocatedOrder);
             });
         }, () -> log.error("Не найдено заказа в базе по id: {}", beerOrderDto.getId()));
     }

@@ -13,8 +13,10 @@ import sakhno.sfg.beer.order.service.domain.BeerOrderStatusEnum;
 import sakhno.sfg.beer.order.service.repositories.BeerOrderRepository;
 import sakhno.sfg.beer.order.service.services.order.BeerOrderManagerServiceImpl;
 import sakhno.sfg.beer.order.service.web.mappers.BeerOrderMapper;
+import sakhno.sfg.beer.order.service.web.model.events.AllocateOrderRequest;
 import sakhno.sfg.beer.order.service.web.model.events.ValidateOrderRequest;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Component("allocatedOrderAction")
@@ -32,9 +34,13 @@ public class AllocatedOrderAction implements Action<BeerOrderStatusEnum, BeerOrd
     @Override
     public void execute(StateContext<BeerOrderStatusEnum, BeerOrderEventEnum> stateContext) {
         String beerOrderId = stateContext.getMessage().getHeaders().get(BeerOrderManagerServiceImpl.ORDER_ID_HEADER).toString();
-        BeerOrderEntity beerOrder = beerOrderRepository.findById(UUID.fromString(beerOrderId)).get();
-        jmsTemplate.convertAndSend(JmsConfig.ALLOCATION_ORDER_QUEUE,
-                beerOrderMapper.beerOrderToDto(beerOrder));
-        log.info("Отправка на распределение в очередь заказа с id: {}", beerOrderId);
+        Optional<BeerOrderEntity> beerOrderEntityOptional = beerOrderRepository.findById(UUID.fromString(beerOrderId));
+        beerOrderEntityOptional.ifPresentOrElse(beerOrderEntity -> {
+            jmsTemplate.convertAndSend(JmsConfig.ALLOCATION_ORDER_QUEUE,
+                    AllocateOrderRequest.builder()
+                            .beerOrderDto(beerOrderMapper.beerOrderToDto(beerOrderEntity))
+                            .build());
+            log.info("Отправка на распределение в очередь заказа с id: {}", beerOrderId);
+        }, () -> log.error("Не найдено заказа по id: {}", beerOrderId));
     }
 }

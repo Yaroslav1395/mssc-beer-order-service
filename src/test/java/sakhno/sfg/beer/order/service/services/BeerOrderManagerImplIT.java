@@ -74,9 +74,9 @@ public class BeerOrderManagerImplIT {
         BeerOrderEntity savedBeerOrder = beerOrderManagerService.newBeerOrder(beerOrder);
 
         await().untilAsserted(() -> {
+            System.out.println(beerOrder.getId());
             BeerOrderEntity foundOrder = beerOrderRepository.findById(beerOrder.getId()).get();
-            //todo: статус ALLOCATED
-            assertEquals(BeerOrderStatusEnum.ALLOCATION_PENDING, foundOrder.getOrderStatus());
+            assertEquals(BeerOrderStatusEnum.ALLOCATED, foundOrder.getOrderStatus());
         });
 
         BeerOrderEntity savedBeerOrder2 = beerOrderRepository.findById(savedBeerOrder.getId()).get();
