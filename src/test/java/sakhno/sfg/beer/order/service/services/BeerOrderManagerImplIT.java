@@ -12,7 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import sakhno.sfg.beer.order.service.config.JmsConfig;
 import sakhno.sfg.beer.order.service.domain.BeerOrderEntity;
 import sakhno.sfg.beer.order.service.domain.BeerOrderLineEntity;
 import sakhno.sfg.beer.order.service.domain.BeerOrderStatusEnum;
@@ -22,12 +24,14 @@ import sakhno.sfg.beer.order.service.repositories.CustomerRepository;
 import sakhno.sfg.beer.order.service.services.beer.BeerServiceImpl;
 import sakhno.sfg.beer.order.service.services.order.BeerOrderManagerService;
 import sakhno.sfg.beer.order.service.web.model.beer.BeerDto;
+import sakhno.sfg.beer.order.service.web.model.events.AllocationFailureEvent;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.okJson;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -45,6 +49,8 @@ public class BeerOrderManagerImplIT {
     ObjectMapper objectMapper;
     @Autowired
     WireMockServer wireMockServer;
+    @Autowired
+    JmsTemplate jmsTemplate;
     CustomerEntity testCustomer;
     UUID beerId = UUID.randomUUID();
 
@@ -138,6 +144,11 @@ public class BeerOrderManagerImplIT {
             BeerOrderEntity foundOrder = beerOrderRepository.findById(beerOrder.getId()).get();
             assertEquals(BeerOrderStatusEnum.ALLOCATION_EXCEPTION, foundOrder.getOrderStatus());
         });
+
+        AllocationFailureEvent allocationFailureEvent = (AllocationFailureEvent) jmsTemplate.receiveAndConvert(
+                JmsConfig.ALLOCATION_FAILURE_QUEUE);
+        assertNotNull(allocationFailureEvent);
+        assertThat(allocationFailureEvent.getOrderId()).isEqualTo(savedBeerOrder.getId());
     }
 
     @Test
