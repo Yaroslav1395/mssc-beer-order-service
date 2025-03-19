@@ -7,14 +7,10 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-/**
- * Объект для получения из очереди результата валидации заказа
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ValidateOrderResult {
+public class AllocationFailureEvent {
     private UUID orderId;
-    private Boolean isValid;
 }

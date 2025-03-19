@@ -26,7 +26,7 @@ CREATE TABLE BEER_ORDER_SERVICE.beer_order_lines (
     create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     last_modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     beer_order_id VARCHAR(36) NOT NULL,
-    beer_id VARCHAR(36) NOT NULL,
+    beer_id VARCHAR(36),
     upc VARCHAR(255),
     order_quantity INT DEFAULT 0,
     quantity_allocated INT DEFAULT 0,

@@ -1,5 +1,6 @@
 package sakhno.sfg.beer.order.service.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
@@ -13,6 +14,8 @@ public class JmsConfig {
     public static final String VALIDATE_ORDER_RESPONSE_QUEUE = "VALIDATE_ORDER_RESPONSE_QUEUE";
     public static final String ALLOCATION_ORDER_QUEUE = "ALLOCATION_ORDER_QUEUE";
     public static final String ALLOCATION_ORDER_RESPONSE_QUEUE = "ALLOCATION_ORDER_RESPONSE_QUEUE";
+    public static final String ALLOCATION_FAILURE_QUEUE = "ALLOCATION_FAILURE_QUEUE";
+    public static final String DEALLOCATE_ORDER_QUEUE = "DEALLOCATE_ORDER_QUEUE";
 
     /**
      * Данный метод создает бин, который будет использоваться как конвертер сообщений при работе с JMS.
@@ -25,10 +28,11 @@ public class JmsConfig {
      * @return - конвертер сообщений
      */
     @Bean
-    public MessageConverter messageConverter() {
+    public MessageConverter messageConverter(ObjectMapper objectMapper) {
         MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
         converter.setTargetType(MessageType.TEXT);
         converter.setTypeIdPropertyName("_type");
+        converter.setObjectMapper(objectMapper);
         return converter;
     }
 }

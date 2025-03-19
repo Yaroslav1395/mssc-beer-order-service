@@ -15,6 +15,11 @@ import java.util.UUID;
 @Slf4j
 public class ValidationResultListener {
     private final BeerOrderManagerService beerOrderManagerService;
+
+    /**
+     * Метод прослушивает очередь в которую попадают результаты валидации заказа на пиво
+     * @param validateOrderResult - результат валидации
+     */
     @JmsListener(destination = JmsConfig.VALIDATE_ORDER_RESPONSE_QUEUE)
     public void listenValidateOrderResult(ValidateOrderResult validateOrderResult) {
         final UUID beerOrderId = validateOrderResult.getOrderId();

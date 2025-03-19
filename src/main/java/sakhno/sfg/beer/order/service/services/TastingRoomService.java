@@ -4,8 +4,8 @@ import sakhno.sfg.beer.order.service.domain.CustomerEntity;
 import sakhno.sfg.beer.order.service.repositories.BeerOrderRepository;
 import sakhno.sfg.beer.order.service.repositories.CustomerRepository;
 import sakhno.sfg.beer.order.service.services.order.BeerOrderService;
-import sakhno.sfg.beer.order.service.web.model.BeerOrderDto;
-import sakhno.sfg.beer.order.service.web.model.BeerOrderLineDto;
+import sakhno.sfg.beer.order.service.web.model.beer.order.BeerOrderDto;
+import sakhno.sfg.beer.order.service.web.model.beer.order.BeerOrderLineDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -49,6 +49,7 @@ public class TastingRoomService {
             doPlaceOrder(customerEntityList.get(0));
         } else {
             log.error("Too many or too few tasting room customers found");
+            customerEntityList.forEach(customerEntity -> log.error(customerEntity.toString()));
         }
     }
 

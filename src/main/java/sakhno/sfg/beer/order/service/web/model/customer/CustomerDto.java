@@ -1,9 +1,10 @@
-package sakhno.sfg.beer.order.service.web.model;
+package sakhno.sfg.beer.order.service.web.model.customer;
 
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import sakhno.sfg.beer.order.service.web.model.beer.BaseItemDto;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -15,11 +16,11 @@ import java.util.UUID;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class CustomerDto extends BaseItemDto {
-    private String name;
+    private String customerName;
 
     @Builder
-    public CustomerDto(UUID id, Integer version, OffsetDateTime createdDate, OffsetDateTime lastModifiedDate, String name) {
+    public CustomerDto(UUID id, Integer version, OffsetDateTime createdDate, OffsetDateTime lastModifiedDate, String customerName) {
         super(id, version, createdDate, lastModifiedDate);
-        this.name = name;
+        this.customerName = customerName;
     }
 }

@@ -13,23 +13,34 @@ import sakhno.sfg.beer.order.service.domain.BeerOrderStatusEnum;
 import sakhno.sfg.beer.order.service.repositories.BeerOrderRepository;
 import sakhno.sfg.beer.order.service.services.order.BeerOrderManagerServiceImpl;
 import sakhno.sfg.beer.order.service.web.mappers.BeerOrderMapper;
+import sakhno.sfg.beer.order.service.web.model.events.AllocateOrderRequest;
+import sakhno.sfg.beer.order.service.web.model.events.ValidateOrderRequest;
 
+import java.util.Optional;
 import java.util.UUID;
 
-@Component
+@Component("allocatedOrderAction")
 @RequiredArgsConstructor
 @Slf4j
 public class AllocatedOrderAction implements Action<BeerOrderStatusEnum, BeerOrderEventEnum> {
     private final JmsTemplate jmsTemplate;
     private final BeerOrderRepository beerOrderRepository;
     private final BeerOrderMapper beerOrderMapper;
+
+    /**
+     * Метод позволяет отправить сообщение в очередь на размещение заказа. Заказ размещается на складе.
+     * @param stateContext - контекст машины состояний
+     */
     @Override
     public void execute(StateContext<BeerOrderStatusEnum, BeerOrderEventEnum> stateContext) {
-        String beerOrderId = (String) stateContext.getMessage().getHeaders().get(BeerOrderManagerServiceImpl.ORDER_ID_HEADER);
-        BeerOrderEntity beerOrder = beerOrderRepository.findOneById(UUID.fromString(beerOrderId));
-        jmsTemplate.convertAndSend(JmsConfig.ALLOCATION_ORDER_QUEUE,
-                beerOrderMapper.beerOrderToDto(beerOrder));
-        log.info("Отправка на распределение в очередь заказа с id: {}", beerOrderId);
-
+        String beerOrderId = stateContext.getMessage().getHeaders().get(BeerOrderManagerServiceImpl.ORDER_ID_HEADER).toString();
+        Optional<BeerOrderEntity> beerOrderEntityOptional = beerOrderRepository.findById(UUID.fromString(beerOrderId));
+        beerOrderEntityOptional.ifPresentOrElse(beerOrderEntity -> {
+            jmsTemplate.convertAndSend(JmsConfig.ALLOCATION_ORDER_QUEUE,
+                    AllocateOrderRequest.builder()
+                            .beerOrderDto(beerOrderMapper.beerOrderToDto(beerOrderEntity))
+                            .build());
+            log.info("Отправка на распределение в очередь заказа с id: {}", beerOrderId);
+        }, () -> log.error("Не найдено заказа по id: {}", beerOrderId));
     }
 }

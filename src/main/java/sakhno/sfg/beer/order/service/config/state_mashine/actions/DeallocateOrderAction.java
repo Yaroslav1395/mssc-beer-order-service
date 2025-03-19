@@ -13,35 +13,33 @@ import sakhno.sfg.beer.order.service.domain.BeerOrderStatusEnum;
 import sakhno.sfg.beer.order.service.repositories.BeerOrderRepository;
 import sakhno.sfg.beer.order.service.services.order.BeerOrderManagerServiceImpl;
 import sakhno.sfg.beer.order.service.web.mappers.BeerOrderMapper;
-import sakhno.sfg.beer.order.service.web.model.events.ValidateOrderRequest;
+import sakhno.sfg.beer.order.service.web.model.events.DeallocateOrderRequest;
 
 import java.util.Optional;
 import java.util.UUID;
 
-@Component("validateOrderAction")
+@Component("deallocateOrderAction")
 @Slf4j
 @RequiredArgsConstructor
-public class ValidateOrderAction implements Action<BeerOrderStatusEnum, BeerOrderEventEnum> {
+public class DeallocateOrderAction implements Action<BeerOrderStatusEnum, BeerOrderEventEnum> {
+    private final JmsTemplate jmsTemplate;
     private final BeerOrderRepository beerOrderRepository;
     private final BeerOrderMapper beerOrderMapper;
-    private final JmsTemplate jmsTemplate;
 
     /**
-     * Метод позволяет отправить в очередь сообщение на валидацию заказа. Проверяется список пива в заказе. Если в списке
-     * есть несуществующее пиво, то валидацию заказ не пройдет
+     * Метод позволяет отправить сообщение в очередь на размещение заказа. Заказ размещается на складе.
      * @param stateContext - контекст машины состояний
      */
     @Override
     public void execute(StateContext<BeerOrderStatusEnum, BeerOrderEventEnum> stateContext) {
         String beerOrderId = stateContext.getMessage().getHeaders().get(BeerOrderManagerServiceImpl.ORDER_ID_HEADER).toString();
-        Optional<BeerOrderEntity> beerOrderOptional = beerOrderRepository.findById(UUID.fromString(beerOrderId));
-
-        beerOrderOptional.ifPresentOrElse(beerOrder -> {
-            jmsTemplate.convertAndSend(JmsConfig.VALIDATE_ORDER_QUEUE, ValidateOrderRequest.builder()
-                    .beerOrderDto(beerOrderMapper.beerOrderToDto(beerOrder))
-                    .build());
-        }, () -> log.error("Заказ не найден по Id: {}", beerOrderId));
-
-        log.info("Отправка запроса на валидацию заказа в очередь. Id заказа: {}", beerOrderId);
+        Optional<BeerOrderEntity> beerOrderEntityOptional = beerOrderRepository.findById(UUID.fromString(beerOrderId));
+        beerOrderEntityOptional.ifPresentOrElse(beerOrderEntity -> {
+            jmsTemplate.convertAndSend(JmsConfig.DEALLOCATE_ORDER_QUEUE,
+                    DeallocateOrderRequest.builder()
+                            .beerOrderDto(beerOrderMapper.beerOrderToDto(beerOrderEntity))
+                            .build());
+            log.info("Отправка на распределение в очередь заказа с id: {}", beerOrderId);
+        }, () -> log.error("Не найдено заказа по id: {}", beerOrderId));
     }
 }

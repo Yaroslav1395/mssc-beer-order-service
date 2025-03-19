@@ -4,10 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.sql.Timestamp;
 import java.util.Set;
@@ -41,8 +38,8 @@ public class CustomerEntity extends BaseEntity {
     @Override
     public String toString() {
         return "CustomerEntity{" +
-                "customerName='" + customerName +
-                "id='" + getId() +
+                "customerName='" + customerName + '\'' +
+                ", apiKey=" + apiKey +
                 '}';
     }
 }
