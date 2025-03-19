@@ -212,7 +212,7 @@ public class BeerOrderManagerImplIT {
         });
     }
 
-    //@Test
+    @Test
     void testAllocatedToCancel() throws JsonProcessingException {
         BeerDto beerDto = BeerDto.builder().id(beerId).upc("12345").build();
         wireMockServer.stubFor(WireMock.get(BeerServiceImpl.BEER_UPC_PATH + "12345")
