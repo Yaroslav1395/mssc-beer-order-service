@@ -41,7 +41,7 @@ public class TastingRoomService {
     }
 
     @Transactional
-    //@Scheduled(fixedRate = 2000) //run every 2 seconds
+    @Scheduled(fixedRate = 2000) //run every 2 seconds
     public void placeTastingRoomOrder(){
         log.info("Отработка метода placeTastingRoomOrder");
         List<CustomerEntity> customerEntityList = customerRepository.findAllByCustomerNameLike(TastingRoomService.TASTING_ROOM);
@@ -49,6 +49,7 @@ public class TastingRoomService {
             doPlaceOrder(customerEntityList.get(0));
         } else {
             log.error("Too many or too few tasting room customers found");
+            customerEntityList.forEach(customerEntity -> log.error(customerEntity.toString()));
         }
     }
 
