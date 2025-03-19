@@ -78,9 +78,9 @@ public class BeerOrderServiceImpl implements BeerOrderService {
             beerOrderEntity.setOrderStatus(BeerOrderStatusEnum.NEW);
             Set<BeerOrderLineEntity> beerOrderLineEntity = beerOrderEntity.getBeerOrderLines();
             beerOrderEntity.setBeerOrderLines(null);
-            BeerOrderEntity beerOrder = beerOrderRepository.saveAndFlush(beerOrderEntity);
-            beerOrderLineEntity.forEach(line -> line.setBeerOrder(beerOrder));
-            BeerOrderEntity savedBeerOrderEntity = beerOrderManagerService.newBeerOrder(beerOrder);
+            //BeerOrderEntity beerOrder = beerOrderRepository.saveAndFlush(beerOrderEntity);
+            BeerOrderEntity savedBeerOrderEntity = beerOrderManagerService.newBeerOrder(beerOrderEntity);
+            beerOrderLineEntity.forEach(line -> line.setBeerOrder(savedBeerOrderEntity));
             log.debug("Saved Beer Order: " + beerOrderEntity.getId());
             return beerOrderMapper.beerOrderToDto(savedBeerOrderEntity);
         }

@@ -15,6 +15,7 @@ import sakhno.sfg.beer.order.service.services.order.BeerOrderManagerServiceImpl;
 import sakhno.sfg.beer.order.service.web.mappers.BeerOrderMapper;
 import sakhno.sfg.beer.order.service.web.model.events.ValidateOrderRequest;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Component("validateOrderAction")
@@ -33,10 +34,14 @@ public class ValidateOrderAction implements Action<BeerOrderStatusEnum, BeerOrde
     @Override
     public void execute(StateContext<BeerOrderStatusEnum, BeerOrderEventEnum> stateContext) {
         String beerOrderId = stateContext.getMessage().getHeaders().get(BeerOrderManagerServiceImpl.ORDER_ID_HEADER).toString();
-        BeerOrderEntity beerOrder = beerOrderRepository.findById(UUID.fromString(beerOrderId)).get();
-        jmsTemplate.convertAndSend(JmsConfig.VALIDATE_ORDER_QUEUE, ValidateOrderRequest.builder()
-                .beerOrderDto(beerOrderMapper.beerOrderToDto(beerOrder))
-                .build());
+        Optional<BeerOrderEntity> beerOrderOptional = beerOrderRepository.findById(UUID.fromString(beerOrderId));
+
+        beerOrderOptional.ifPresentOrElse(beerOrder -> {
+            jmsTemplate.convertAndSend(JmsConfig.VALIDATE_ORDER_QUEUE, ValidateOrderRequest.builder()
+                    .beerOrderDto(beerOrderMapper.beerOrderToDto(beerOrder))
+                    .build());
+        }, () -> log.error("Заказ не найден по Id: {}", beerOrderId));
+
         log.info("Отправка запроса на валидацию заказа в очередь. Id заказа: {}", beerOrderId);
     }
 }
