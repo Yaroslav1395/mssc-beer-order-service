@@ -72,18 +72,20 @@ public class BeerOrderServiceImpl implements BeerOrderService {
         Optional<CustomerEntity> customerOptional = customerRepository.findById(customerId);
 
         if (customerOptional.isPresent()) {
-            BeerOrderEntity beerOrderEntity = beerOrderMapper.dtoToBeerOrder(beerOrderDto);
-            beerOrderEntity.setId(null);
-            beerOrderEntity.setCustomer(customerOptional.get());
-            beerOrderEntity.setOrderStatus(BeerOrderStatusEnum.NEW);
-            Set<BeerOrderLineEntity> beerOrderLineEntity = beerOrderEntity.getBeerOrderLines();
-            beerOrderEntity.setBeerOrderLines(null);
-            //BeerOrderEntity beerOrder = beerOrderRepository.saveAndFlush(beerOrderEntity);
-            BeerOrderEntity savedBeerOrderEntity = beerOrderManagerService.newBeerOrder(beerOrderEntity);
-            beerOrderLineEntity.forEach(line -> line.setBeerOrder(savedBeerOrderEntity));
-            log.debug("Saved Beer Order: " + beerOrderEntity.getId());
-            return beerOrderMapper.beerOrderToDto(savedBeerOrderEntity);
+            BeerOrderEntity beerOrder = beerOrderMapper.dtoToBeerOrder(beerOrderDto);
+            beerOrder.setId(null); //should not be set by outside client
+            beerOrder.setCustomer(customerOptional.get());
+            beerOrder.setOrderStatus(BeerOrderStatusEnum.NEW);
+
+            beerOrder.getBeerOrderLines().forEach(line -> line.setBeerOrder(beerOrder));
+
+            BeerOrderEntity savedBeerOrder = beerOrderManagerService.newBeerOrder(beerOrder);
+
+            log.debug("Saved Beer Order: " + beerOrder.getId());
+
+            return beerOrderMapper.beerOrderToDto(savedBeerOrder);
         }
+        //todo add exception type
         throw new RuntimeException("Customer Not Found");
     }
 

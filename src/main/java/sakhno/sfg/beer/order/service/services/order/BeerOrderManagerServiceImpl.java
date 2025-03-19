@@ -13,6 +13,7 @@ import sakhno.sfg.beer.order.service.config.state_mashine.BeerOrderStateChangeIn
 import sakhno.sfg.beer.order.service.domain.BeerOrderEntity;
 import sakhno.sfg.beer.order.service.domain.BeerOrderEventEnum;
 import sakhno.sfg.beer.order.service.domain.BeerOrderStatusEnum;
+import sakhno.sfg.beer.order.service.repositories.BeerOrderLineRepository;
 import sakhno.sfg.beer.order.service.repositories.BeerOrderRepository;
 import sakhno.sfg.beer.order.service.web.model.beer.order.BeerOrderDto;
 

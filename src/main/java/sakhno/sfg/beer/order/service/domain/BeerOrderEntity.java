@@ -23,7 +23,7 @@ public class BeerOrderEntity extends BaseEntity {
     @JoinColumn(name = "customer_id", columnDefinition = "varchar", nullable = false)
     private CustomerEntity customer;
 
-    @OneToMany(mappedBy = "beerOrder", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @OneToMany(mappedBy = "beerOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     @Fetch(FetchMode.JOIN)
     private Set<BeerOrderLineEntity> beerOrderLines;
 
