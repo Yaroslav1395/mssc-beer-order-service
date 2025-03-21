@@ -31,6 +31,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.plugin>3.8.0</maven.compiler.plugin>
         <actuator.version>3.4.2</actuator.version>
+        <spring-cloud.version>2024.0.0</spring-cloud.version>
         <state.machine.version>2.1.3.RELEASE</state.machine.version>
         <jaxb.version>2.3.0</jaxb.version>
         <jackson.datatype>2.15.2</jackson.datatype>
@@ -48,6 +49,11 @@
             <artifactId>spring-boot-starter-web</artifactId>
             <version>${actuator.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
 
 
 
@@ -160,6 +166,18 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>

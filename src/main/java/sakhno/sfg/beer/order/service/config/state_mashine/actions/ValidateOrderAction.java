@@ -1,5 +1,7 @@
 package sakhno.sfg.beer.order.service.config.state_mashine.actions;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.core.JmsTemplate;
@@ -25,6 +27,7 @@ public class ValidateOrderAction implements Action<BeerOrderStatusEnum, BeerOrde
     private final BeerOrderRepository beerOrderRepository;
     private final BeerOrderMapper beerOrderMapper;
     private final JmsTemplate jmsTemplate;
+    private final ObjectMapper objectMapper;
 
     /**
      * Метод позволяет отправить в очередь сообщение на валидацию заказа. Проверяется список пива в заказе. Если в списке
