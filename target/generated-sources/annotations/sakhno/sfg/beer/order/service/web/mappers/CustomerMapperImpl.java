@@ -8,8 +8,8 @@ import sakhno.sfg.beer.order.service.web.model.customer.CustomerDto;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-03-29T18:37:10+0600",
-    comments = "version: 1.5.3.Final, compiler: javac, environment: Java 19.0.2 (Oracle Corporation)"
+    date = "2025-03-31T14:32:49+0600",
+    comments = "version: 1.5.3.Final, compiler: javac, environment: Java 19.0.2 (Amazon.com Inc.)"
 )
 @Component
 public class CustomerMapperImpl implements CustomerMapper {
